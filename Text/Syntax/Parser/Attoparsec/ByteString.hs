@@ -1,26 +1,29 @@
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Text.Syntax.Parser.Attoparsec.ByteString (
   runAsAttoparsec', runAsAttoparsec,
-  runAsAttoparsecChar8', runAsAttoparsecChar8
+  runAsAttoparsecChar8', runAsAttoparsecChar8,
+  runAsIAttoparsec',
+  runAsIAttoparsecChar8'
   ) where
 
-import Text.Syntax.Parser.Instances ()
-import Text.Syntax.Poly
-  ((<||>), TryAlternative (try, (<|>)), Syntax(..),
-   RunAsParser)
+import           Text.Syntax.Parser.Attoparsec.RunResult (runIResult, runResult)
+import           Text.Syntax.Parser.Instances        ()
+import           Text.Syntax.Poly                    (RunAsIParser, RunAsParser,
+                                                      Syntax (..), TryAlternative (try, (<|>)),
+                                                      (<||>))
 
-import Data.Attoparsec.Types (Parser, IResult (..))
 
-import Data.ByteString (ByteString, empty)
-import qualified Data.ByteString.Lazy as L (ByteString)
-import qualified Data.Attoparsec.ByteString as A (anyWord8, try, parse)
-import qualified Data.Attoparsec.ByteString.Char8 as A (anyChar)
-import qualified Data.Attoparsec.ByteString.Lazy as L
+import qualified Data.Attoparsec.ByteString          as A (anyWord8, parse, try)
+import qualified Data.Attoparsec.ByteString.Char8    as A (anyChar)
+import qualified Data.Attoparsec.ByteString.Lazy     as L
+import           Data.Attoparsec.Types               (Parser)
+import           Data.ByteString                     (ByteString)
+import qualified Data.ByteString.Lazy                as L (ByteString)
 
-import Data.Word (Word8)
-
+import           Data.Word                           (Word8)
 
 instance TryAlternative (Parser ByteString) where
   try = A.try
@@ -28,13 +31,6 @@ instance TryAlternative (Parser ByteString) where
 
 instance Syntax Word8 (Parser ByteString) where
   token = A.anyWord8
-
-runResult :: IResult ByteString a -> Either ([String], String) a
-runResult r' = case r' of
-  Fail _ estack msg -> Left (estack, msg)
-  Partial f         -> runResult (f empty)
-  Done _ r          -> Right r
-
 
 runAsAttoparsec' :: RunAsParser Word8 ByteString a ([String], String)
 runAsAttoparsec' parser tks = runResult $ A.parse parser tks
@@ -57,3 +53,10 @@ runAsAttoparsecChar8 parser tks =
   case L.parse parser tks of
     L.Fail _ estack msg -> Left (estack, msg)
     L.Done _ r          -> Right r
+
+runAsIAttoparsec' :: RunAsIParser Word8 ByteString a ([String], String)
+runAsIAttoparsec' parser tks = runIResult $ A.parse parser tks
+
+runAsIAttoparsecChar8' :: RunAsIParser Char ByteString a ([String], String)
+runAsIAttoparsecChar8' parser tks = runIResult $ A.parse parser tks
+

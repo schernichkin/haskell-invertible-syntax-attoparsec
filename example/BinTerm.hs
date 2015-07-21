@@ -9,7 +9,7 @@ import Data.String (IsString)
 import Control.Isomorphism.Partial.Ext
   (Iso, IsoFunctor ((<$>)), subset)
 import Text.Syntax.Poly
-  ((<*>), (<|>), token,
+  ((>*<), (<|>), token,
    this, (*>), (<*), many, optional, (<$?>), format)
 import Text.Syntax.Poly.Type (SyntaxT)
 
@@ -60,7 +60,7 @@ uni =  var
   <|>  lParen *> expr <* rParen
 
 bin :: Iso (a, a) a -> BinSyntax a -> Char -> BinSyntax a
-bin cons upper op = cons <$?> upper <*> optional (justC op *> upper)
+bin cons upper op = cons <$?> upper >*< optional (justC op *> upper)
 
 power :: BinSyntax Exp
 power =  bin T.pow  uni   '^'
@@ -99,7 +99,7 @@ type Elem  = T.ElemT  Char
 type Block = T.BlockT Char
 
 elem' :: BinSyntax () -> BinSyntax Elem
-elem' indent' = T.blockE   <$> block indent' lBrace   rBrace <|>
+elem' indent' = T.blockE   <$> block indent' lBrace   rBrace    <|>
                 T.bracketE <$> block indent' lBracket rBracket  <|>
                 T.expE     <$> indent' *> expr <* semi <* newline
 

@@ -1,22 +1,24 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverlappingInstances  #-}
 
 module Text.Syntax.Printer.Text (
   runAsPrinter, runAsPrinter'
   ) where
 
-import Control.Monad (liftM2, mplus)
+import           Control.Monad               (liftM2, mplus)
 
-import Control.Isomorphism.Partial (IsoFunctor ((<$>)), unapply)
-import Text.Syntax.Poly
-  (ProductFunctor ((<*>)),
-   IsoAlternative ((<||>), empty), TryAlternative,
-   AbstractSyntax (syntax), Syntax (token),
-   RunAsPrinter, ErrorString, errorString)
+import           Control.Isomorphism.Partial (IsoFunctor ((<$>)), unapply)
+import           Text.Syntax.Poly            (AbstractSyntax (syntax),
+                                              ErrorString,
+                                              IsoAlternative ((<||>), empty),
+                                              ProductFunctor ((>*<)),
+                                              RunAsPrinter, Syntax (token),
+                                              TryAlternative, errorString)
 
 
-import qualified Data.Text as S (Text, concat)
-import Data.Text.Lazy (Text, append, toChunks, singleton)
-import qualified Data.Text.Lazy as L
+import qualified Data.Text                   as S (Text, concat)
+import           Data.Text.Lazy              (Text, append, singleton, toChunks)
+import qualified Data.Text.Lazy              as L
 
 newtype Printer alpha =
   Printer { runPrinter :: alpha -> Maybe Text }
@@ -26,7 +28,7 @@ instance IsoFunctor Printer where
     = Printer (\b -> unapply iso b >>= p)
 
 instance ProductFunctor Printer where
-  Printer p <*> Printer q
+  Printer p >*< Printer q
     = Printer (\(x, y) -> liftM2 append (p x) (q y))
 
 instance IsoAlternative Printer where

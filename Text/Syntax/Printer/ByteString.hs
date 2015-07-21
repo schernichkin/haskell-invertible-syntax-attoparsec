@@ -1,4 +1,5 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverlappingInstances #-}
 
 module Text.Syntax.Printer.ByteString (
   runAsPrinter, runAsPrinterChar8,
@@ -9,7 +10,7 @@ import Control.Monad (liftM2, mplus)
 
 import Control.Isomorphism.Partial (IsoFunctor ((<$>)), unapply)
 import Text.Syntax.Poly
-  (ProductFunctor ((<*>)),
+  (ProductFunctor ((>*<)),
    IsoAlternative ((<||>), empty), TryAlternative,
    AbstractSyntax (syntax), Syntax (token),
    RunAsPrinter, ErrorString, errorString)
@@ -28,7 +29,7 @@ instance IsoFunctor Printer where
     = Printer (\b -> unapply iso b >>= p)
 
 instance ProductFunctor Printer where
-  Printer p <*> Printer q
+  Printer p >*< Printer q
     = Printer (\(x, y) -> liftM2 append (p x) (q y))
 
 instance IsoAlternative Printer where

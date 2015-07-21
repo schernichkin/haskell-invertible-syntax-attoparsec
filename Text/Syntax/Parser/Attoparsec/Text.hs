@@ -1,21 +1,23 @@
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Text.Syntax.Parser.Attoparsec.Text (
-  runAsAttoparsec', runAsAttoparsec
+  runAsAttoparsec', runAsAttoparsec,
+  runAsIAttoparsec'
   ) where
 
-import Text.Syntax.Parser.Instances ()
-import Text.Syntax.Poly
-  ((<||>), TryAlternative (try, (<|>)), Syntax(..),
-   RunAsParser)
+import           Data.Attoparsec.Types                (Parser)
+import           Text.Syntax.Parser.Instances         ()
+import           Text.Syntax.Poly                     (RunAsIParser,
+                                                       RunAsParser, Syntax (..), TryAlternative (try, (<|>)),
+                                                       (<||>))
 
-import Data.Attoparsec.Types (Parser, IResult (..))
-
-import Data.Text (Text, empty)
-import qualified Data.Text.Lazy as L (Text)
-import qualified Data.Attoparsec.Text as A (anyChar, try, parse)
-import qualified Data.Attoparsec.Text.Lazy as L
+import qualified Data.Attoparsec.Text                 as A (anyChar, parse, try)
+import qualified Data.Attoparsec.Text.Lazy            as L
+import           Data.Text                            (Text)
+import qualified Data.Text.Lazy                       as L (Text)
+import           Text.Syntax.Parser.Attoparsec.RunResult (runIResult, runResult)
 
 instance TryAlternative (Parser Text) where
   try = A.try
@@ -26,13 +28,12 @@ instance Syntax Char (Parser Text) where
 
 runAsAttoparsec' :: RunAsParser Char Text a ([String], String)
 runAsAttoparsec' parser tks = runResult $ A.parse parser tks where
-  runResult r' = case r' of
-    Fail _ estack msg -> Left (estack, msg)
-    Partial f         -> runResult (f empty)
-    Done _ r          -> Right r
 
 runAsAttoparsec :: RunAsParser Char L.Text a ([String], String)
 runAsAttoparsec parser tks =
   case L.parse parser tks of
     L.Fail _ estack msg -> Left (estack, msg)
     L.Done _ r          -> Right r
+
+runAsIAttoparsec' :: RunAsIParser Char Text a ([String], String)
+runAsIAttoparsec' parser tks = runIResult $ A.parse parser tks

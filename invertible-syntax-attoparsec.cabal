@@ -1,5 +1,5 @@
 name:                invertible-syntax-attoparsec
-version:             0.1.0.0
+version:             0.1.1.0
 synopsis:            Turn attoparsec Parser types into instance of invertible-syntax-poly.
 description:         Turn attoparsec Parser types into instance of invertible-syntax-poly.
 homepage:            http://twitter.com/khibino
@@ -28,7 +28,7 @@ library
                       , text
                       , attoparsec >= 0.10
                       , partial-isomorphisms
-                      , invertible-syntax-poly
+                      , invertible-syntax-poly >= 0.1.1.0
 
 source-repository head
   type:     git

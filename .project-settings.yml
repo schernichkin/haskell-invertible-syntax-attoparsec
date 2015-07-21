@@ -1,0 +1,20 @@
+binary-ghc-args:
+- -O
+- -threaded
+module-template: ! 'module MODULE_NAME where
+
+'
+extensions: {}
+environment: ghc-7.8-stable-14.09
+auto-hidden: []
+cabal-file: project.cabal
+version: 1
+extra-packages: ! 'Git: git@github.com:schernichkin/partial-isomorphisms.git c6d38d7faf642cbc9dee4adbc99ebb62cc859449
+
+  Git: git@github.com:schernichkin/haskell-invertible-syntax-poly.git 57d4d337029bb5f65d74f2c12a0cc24fc6365336
+
+'
+ghc-args:
+- -Wall
+excluded-modules:
+- Setup.hs
